@@ -4,89 +4,144 @@ pragma solidity ^0.8.22;
 import "./Lottery.sol";
 
 contract Taxpayer {
+    uint age;
 
- uint age; 
+    bool isMarried;
 
- bool isMarried; 
+    bool iscontract;
 
- bool iscontract;
+    /* Reference to spouse if person is married, address(0) otherwise */
+    address spouse;
 
- /* Reference to spouse if person is married, address(0) otherwise */
- address spouse; 
+    address parent1;
+    address parent2;
 
+    /* Constant default income tax allowance */
+    uint constant DEFAULT_ALLOWANCE = 5000;
 
-address  parent1; 
-address  parent2; 
+    /* Constant income tax allowance for Older Taxpayers over 65 */
+    uint constant ALLOWANCE_OAP = 7000;
 
- /* Constant default income tax allowance */
- uint constant  DEFAULT_ALLOWANCE = 5000;
+    /* Income tax allowance */
+    uint tax_allowance;
 
- /* Constant income tax allowance for Older Taxpayers over 65 */
-  uint constant ALLOWANCE_OAP = 7000;
+    uint income;
 
- /* Income tax allowance */
- uint tax_allowance; 
+    uint256 rev;
 
- uint income; 
+    address constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
-uint256 rev;
+    modifier onlyValidAddress(address _addr) {
+        require(
+            isValidSpouseAddress(_addr),
+            "Invalid or restricted spouse address"
+        );
+        _;
+    }
 
+    //Parents are taxpayers
+    constructor(address p1, address p2) {
+        age = 0;
+        isMarried = false;
+        parent1 = p1;
+        parent2 = p2;
+        spouse = address(0);
+        income = 0;
+        tax_allowance = DEFAULT_ALLOWANCE;
+        iscontract = true;
+    }
 
-//Parents are taxpayers
- constructor(address p1, address p2) {
-   age = 0;
-   isMarried = false;
-   parent1 = p1;
-   parent2 = p2;
-   spouse = address(0);
-   income = 0;
-   tax_allowance = DEFAULT_ALLOWANCE;
-   iscontract = true;
- } 
+    /**
+     * @dev Establishes a symmetrical marriage with another taxpayer.
+     * Uses a reciprocal call to ensure both contracts reflect the marriage.
+     * @param new_spouse The address of the spouse's Taxpayer contract.
+     */
+    function marry(address new_spouse) public onlyValidAddress(new_spouse) {
+        if (isMarried && spouse == new_spouse) return;
+        require(!isMarried, "Taxpayer is already married");
 
+        Taxpayer sp = Taxpayer(new_spouse);
+        require(
+            !sp.isMarriedState() || sp.spouseAddress() == address(this),
+            "Partner unavailable"
+        );
 
- //We require new_spouse != address(0);
- function marry(address new_spouse) public {
-  spouse = new_spouse;
-  isMarried = true;
- }
- 
- function divorce() public {
-  spouse = address(0);
-  isMarried = false;
- }
+        spouse = new_spouse;
+        isMarried = true;
+        sp.marry(address(this));
+    }
 
- /* Transfer part of tax allowance to own spouse */
- function transferAllowance(uint change) public {
-  tax_allowance = tax_allowance - change;
-  Taxpayer sp = Taxpayer(address(spouse));
-  sp.setTaxAllowance(sp.getTaxAllowance()+change);
- }
+    /**
+     * @dev Dissolves the marriage symmetrically.
+     * Resets local state first and then triggers divorce in the spouse's contract.
+     */
+    function divorce() public {
+        if (!isMarried) return;
 
- function haveBirthday() public {
-  age++;
- }
- 
-  function setTaxAllowance(uint ta) public {
-    require(Taxpayer(msg.sender).isContract() || Lottery(msg.sender).isContract());
-    tax_allowance = ta;
-  }
-  function getTaxAllowance() public view returns(uint) {
-    return tax_allowance;
-  }
-  function isContract() public view returns(bool){
-    return iscontract;
-  }
+        address oldSpouse = spouse;
+        spouse = address(0);
+        isMarried = false;
 
-  function joinLottery(address lot, uint256 r) public {
-    Lottery l = Lottery(lot);
-    l.commit(keccak256(abi.encode(r)));
-    rev = r;
-  }
-   function revealLottery(address lot, uint256 r) public {
-    Lottery l = Lottery(lot);
-    l.reveal(r);
-    rev = 0;
-  }
+        Taxpayer(oldSpouse).divorce();
+    }
 
+    /* Transfer part of tax allowance to own spouse */
+    function transferAllowance(uint change) public {
+        tax_allowance = tax_allowance - change;
+        Taxpayer sp = Taxpayer(address(spouse));
+        sp.setTaxAllowance(sp.getTaxAllowance() + change);
+    }
+
+    function haveBirthday() public {
+        age++;
+    }
+
+    function setTaxAllowance(uint ta) public {
+        require(
+            Taxpayer(msg.sender).isContract() ||
+                Lottery(msg.sender).isContract()
+        );
+        tax_allowance = ta;
+    }
+    function getTaxAllowance() public view returns (uint) {
+        return tax_allowance;
+    }
+
+    function isMarriedState() public view returns (bool) {
+        return isMarried;
+    }
+
+    function spouseAddress() public view returns (address) {
+        return spouse;
+    }
+
+    function isContract() public view returns (bool) {
+        return iscontract;
+    }
+
+    function joinLottery(address lot, uint256 r) public {
+        Lottery l = Lottery(lot);
+        l.commit(keccak256(abi.encode(r)));
+        rev = r;
+    }
+    function revealLottery(address lot, uint256 r) public {
+        Lottery l = Lottery(lot);
+        l.reveal(r);
+        rev = 0;
+    }
+
+    /**
+     * @dev Validates if an address is suitable for contract interactions.
+     * Checks against the null address, precompiled contracts (0x1-0x9),
+     * the burn address (0xdEaD), and the contract's own address.
+     * @param _addr The address to be validated.
+     * @return bool True if the address is valid, false otherwise.
+     */
+    function isValidSpouseAddress(address _addr) public view returns (bool) {
+        return
+            _addr != address(0) &&
+            _addr != BURN_ADDRESS &&
+            _addr != address(this) &&
+            uint160(_addr) > 9;
+    }
 }

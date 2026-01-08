@@ -11,3 +11,9 @@
         - If so, check if spouse is also married
             - If so, check if spouse is married to person
 - Assumption: monogamous marriage >> No marriage allowed if already married
+
+## Results:
+- echidna_married_and_spouse_set_at_the_same_time: failed!💥  
+  Call sequence:
+    TestTaxpayer.marry(0x0)
+    - Solution: filter addresses for invalid values such as 0x0-0x9,0xdEaD, one's own address
