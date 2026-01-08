@@ -1,6 +1,7 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.22;
 
-import "Lottery.sol";
+import "./Lottery.sol";
 
 contract Taxpayer {
 
