@@ -36,3 +36,6 @@ echidna_valid_tax_allowance: failed!💥
     TestTaxpayer.marry_candidate()
     TestTaxpayer.transferAllowance(1)
     TestTaxpayer.divorce()
+
+# Task 3:
+- Check that lottery win doesn't influence the allowance for people over 64

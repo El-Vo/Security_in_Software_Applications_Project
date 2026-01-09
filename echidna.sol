@@ -71,7 +71,7 @@ contract TestTaxpayer is Taxpayer {
         Check that the tax allowance of an unmarried taxpayer under 65 who hasn't won the lottery is 5000.
     */
     function echidna_valid_tax_allowance() public view returns (bool) {
-        if (age < 65 && !isMarried && !hasWonLottery()) {
+        if (age < 65 && !isMarried && !hasExtendedTaxAllowance()) {
             return (getTaxAllowance() == 5000);
         }
         return true;
@@ -81,7 +81,7 @@ contract TestTaxpayer is Taxpayer {
         Check that the tax allowance of an unmarried taxpayer under 65 who has won the lottery is 7000.
     */
     function echidna_valid_tax_allowance_winner() public view returns (bool) {
-        if (age < 65 && !isMarried && hasWonLottery()) {
+        if (age < 65 && !isMarried && hasExtendedTaxAllowance()) {
             return (getTaxAllowance() == 7000);
         }
         return true;
@@ -134,11 +134,31 @@ contract TestTaxpayer is Taxpayer {
     {
         if (isMarried && age > 64) {
             Taxpayer spObj = Taxpayer(spouseAddress());
-                if (spObj.age() > 64) {
-                    uint combined = getTaxAllowance() + spObj.getTaxAllowance();
-                    return (combined == 14000);
-                }
+            if (spObj.age() > 64) {
+                uint combined = getTaxAllowance() + spObj.getTaxAllowance();
+                return (combined == 14000);
+            }
         }
         return true;
     }
+
+    /** 
+        Helper function for echidna to advance age more quickly.
+    */
+    function advance_taxpayer_age() public {
+        for (uint i = 0; i < 15; i++) {
+            haveBirthday();
+        }
+    }
+
+    /** 
+        Helper function for echidna to advance age of spouse more quickly.
+    */
+    function advance_taxpayer_spouse_age() public {
+        for (uint i = 0; i < 15; i++) {
+            Taxpayer(spouseAddress()).haveBirthday();
+        }
+    }
+
+
 }
