@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import "./Lottery.sol";
 
 contract Taxpayer {
-    uint age;
+    uint public age;
 
     bool isMarried;
 
@@ -29,6 +29,8 @@ contract Taxpayer {
 
     uint256 rev;
 
+    bool won_lottery;
+
     address constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
     modifier onlyValidAddress(address _addr) {
@@ -49,6 +51,7 @@ contract Taxpayer {
         income = 0;
         tax_allowance = DEFAULT_ALLOWANCE;
         iscontract = true;
+        won_lottery = false;
     }
 
     /**
@@ -82,29 +85,69 @@ contract Taxpayer {
         spouse = address(0);
         isMarried = false;
 
+        // Set the default tax allowance again with respect to if the taxpayer has won the lottery or not.
+        if (hasWonLottery()) {
+            setTaxAllowance(ALLOWANCE_OAP);
+        } else {
+            setTaxAllowance(DEFAULT_ALLOWANCE);
+        }
+
         Taxpayer(oldSpouse).divorce();
     }
 
-    /* Transfer part of tax allowance to own spouse */
+    /**
+     * @dev Transfers a portion of the tax allowance to the spouse.
+     * Ensures that the deduction and addition are balanced and only possible while married.
+     * @param change The amount of allowance to transfer.
+     */
     function transferAllowance(uint change) public {
-        tax_allowance = tax_allowance - change;
-        Taxpayer sp = Taxpayer(address(spouse));
-        sp.setTaxAllowance(sp.getTaxAllowance() + change);
+        require(isMarried, "Not married");
+        require(change > 0, "Amount must be positive");
+        require(change <= tax_allowance, "Insufficient allowance");
+
+        tax_allowance -= change;
+        Taxpayer(spouse).receiveAllowance(change);
+    }
+
+    /**
+     * @dev Receives tax allowance from the spouse.
+     * Can only be called by the current spouse contract.
+     * @param amount The amount of allowance to receive.
+     */
+    function receiveAllowance(uint amount) external {
+        require(isMarried, "Not married");
+        require(msg.sender == spouse, "Only spouse can transfer allowance");
+        tax_allowance += amount;
     }
 
     function haveBirthday() public {
         age++;
     }
 
-    function setTaxAllowance(uint ta) public {
+    function setTaxAllowance(uint ta) internal {
         require(
             Taxpayer(msg.sender).isContract() ||
                 Lottery(msg.sender).isContract()
         );
         tax_allowance = ta;
     }
+
     function getTaxAllowance() public view returns (uint) {
         return tax_allowance;
+    }
+
+    function addTaxAllowance(uint ta) internal {
+        tax_allowance = tax_allowance + ta;
+    }
+
+    function setWonLottery() public {
+        require(Lottery(msg.sender).isContract());
+        won_lottery = true;
+        addTaxAllowance(2000);
+    }
+
+    function hasWonLottery() public view returns (bool) {
+        return won_lottery;
     }
 
     function isMarriedState() public view returns (bool) {
@@ -120,11 +163,16 @@ contract Taxpayer {
     }
 
     function joinLottery(address lot, uint256 r) public {
+        // If the taxpayer has already participated, he/she cannot enter again.
+        if (hasWonLottery()) return;
+
         Lottery l = Lottery(lot);
         l.commit(keccak256(abi.encode(r)));
         rev = r;
     }
     function revealLottery(address lot, uint256 r) public {
+        if (hasWonLottery()) return;
+
         Lottery l = Lottery(lot);
         l.reveal(r);
         rev = 0;

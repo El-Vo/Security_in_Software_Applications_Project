@@ -10,6 +10,8 @@ contract TestTaxpayer is Taxpayer {
         candidate = new Taxpayer(address(0x13), address(0x14));
     }
 
+    // ASSIGNMENT PART 1
+
     /** 
         Check if bool isMarried and spouse address are correctly set in conjunction to each other.
         If the taxpayer isn't married, he/she shouldn't have a spouse address and vice versa.
@@ -61,5 +63,54 @@ contract TestTaxpayer is Taxpayer {
 
     function divorce_candidate() public {
         divorce();
+    }
+
+    // ASSIGNMENT PART 2
+
+    /** 
+        Check that the tax allowance of an unmarried taxpayer under 65 who hasn't won the lottery is 5000.
+    */
+    function echidna_valid_tax_allowance() public view returns (bool) {
+        if (age < 65 && !isMarried && !hasWonLottery()) {
+            return (getTaxAllowance() == 5000);
+        }
+        return true;
+    }
+
+    /** 
+        Check that the tax allowance of an unmarried taxpayer under 65 who has won the lottery is 7000.
+    */
+    function echidna_valid_tax_allowance_winner() public view returns (bool) {
+        if (age < 65 && !isMarried && hasWonLottery()) {
+            return (getTaxAllowance() == 7000);
+        }
+        return true;
+    }
+
+    /** 
+        Check that the tax allowance of a taxpayer is never below zero.
+    */
+    function echidna_tax_allowance_never_lower_than_zero() public view returns (bool) {
+            return (getTaxAllowance() >= 0);
+    }
+
+    /** 
+        Check that the tax allowance of a married couple is always either 10000,12000 or 14000.
+    */
+    function echidna_valid_married_tax_allowance() public view returns (bool) {
+        if (isMarried) {
+            Taxpayer spObj = Taxpayer(spouseAddress());
+            try spObj.age() returns (uint spouseAge) {
+                if (spouseAge < 65) {
+                    uint combined = getTaxAllowance() + spObj.getTaxAllowance();
+                    return (combined == 10000 ||
+                        combined == 12000 ||
+                        combined == 14000);
+                }
+            } catch {
+                return false;
+            }
+        }
+        return true;
     }
 }

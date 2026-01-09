@@ -2,24 +2,44 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Echidna: Start Container",
+            "type": "shell",
+            "command": "docker run -d --name echidna-container -v \"${workspaceFolder}:/src\" -w /src --entrypoint tail ghcr.io/crytic/echidna/echidna -f /dev/null",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Echidna: Stop Container",
+            "type": "shell",
+            "command": "docker stop echidna-container; docker rm echidna-container",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "Echidna: Test Current File",
             "type": "shell",
-            "command": "docker run --rm -v \"${workspaceFolder}:/src\" -w /src ghcr.io/crytic/echidna/echidna echidna ${relativeFile} --contract ${input:contractName}",
+            "command": "docker exec -it echidna-container echidna ${relativeFile} --contract ${input:contractName}",
             "group": "test",
             "presentation": {
                 "reveal": "always",
-                "panel": "new"
+                "panel": "dedicated"
             },
             "problemMatcher": []
         },
         {
             "label": "Echidna: Test Current File with Coverage",
             "type": "shell",
-            "command": "docker run --rm -v \"${workspaceFolder}:/src\" -w /src ghcr.io/crytic/echidna/echidna echidna ${relativeFile} --contract ${input:contractName} --corpus-dir /src/coverage",
+            "command": "docker exec -it echidna-container echidna ${relativeFile} --contract ${input:contractName} --corpus-dir /src/coverage",
             "group": "test",
             "presentation": {
                 "reveal": "always",
-                "panel": "new"
+                "panel": "dedicated"
             },
             "problemMatcher": []
         }
