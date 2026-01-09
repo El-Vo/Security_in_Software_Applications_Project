@@ -4,7 +4,18 @@
         {
             "label": "Echidna: Test Current File",
             "type": "shell",
-            "command": "docker run --rm -it -v \"${workspaceFolder}:/src\" -w /src ghcr.io/crytic/echidna/echidna echidna ${relativeFile} --contract ${input:contractName}",
+            "command": "docker run --rm -v \"${workspaceFolder}:/src\" -w /src ghcr.io/crytic/echidna/echidna echidna ${relativeFile} --contract ${input:contractName}",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Echidna: Test Current File with Coverage",
+            "type": "shell",
+            "command": "docker run --rm -v \"${workspaceFolder}:/src\" -w /src ghcr.io/crytic/echidna/echidna echidna ${relativeFile} --contract ${input:contractName} --corpus-dir /src/coverage",
             "group": "test",
             "presentation": {
                 "reveal": "always",

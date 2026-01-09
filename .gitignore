@@ -4,3 +4,4 @@ crytic-export/combined_solc.json
 artifacts/*
 .states/*
 .prettierrc.json
+coverage/*
