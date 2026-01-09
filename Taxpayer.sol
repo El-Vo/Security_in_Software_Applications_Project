@@ -134,14 +134,26 @@ contract Taxpayer {
      * @dev Validates if an address is suitable for contract interactions.
      * Checks against the null address, precompiled contracts (0x1-0x9),
      * the burn address (0xdEaD), and the contract's own address.
+     * Additionally verifies that the target is a contract and a valid Taxpayer.
      * @param _addr The address to be validated.
      * @return bool True if the address is valid, false otherwise.
      */
     function isValidSpouseAddress(address _addr) public view returns (bool) {
-        return
-            _addr != address(0) &&
-            _addr != BURN_ADDRESS &&
-            _addr != address(this) &&
-            uint160(_addr) > 9;
+        if (
+            _addr == address(0) ||
+            _addr == BURN_ADDRESS ||
+            _addr == address(this) ||
+            uint160(_addr) <= 9 ||
+            _addr.code.length == 0
+        ) {
+            return false;
+        }
+
+        // Try to call isContract() to verify it is a Taxpayer contract
+        try Taxpayer(_addr).isContract() returns (bool isTax) {
+            return isTax;
+        } catch {
+            return false;
+        }
     }
 }

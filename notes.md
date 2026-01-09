@@ -11,6 +11,7 @@
         - If so, check if spouse is also married
             - If so, check if spouse is married to person
 - Assumption: monogamous marriage >> No marriage allowed if already married
+- Check that parent aren't allowed to be yourself and the same
 
 ## Results:
 - echidna_married_and_spouse_set_at_the_same_time: failed!💥  
