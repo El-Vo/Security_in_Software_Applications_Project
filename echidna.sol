@@ -90,26 +90,54 @@ contract TestTaxpayer is Taxpayer {
     /** 
         Check that the tax allowance of a taxpayer is never below zero.
     */
-    function echidna_tax_allowance_never_lower_than_zero() public view returns (bool) {
-            return (getTaxAllowance() >= 0);
+    function echidna_tax_allowance_never_lower_than_zero()
+        public
+        view
+        returns (bool)
+    {
+        return (getTaxAllowance() >= 0);
     }
 
     /** 
-        Check that the tax allowance of a married couple is always either 10000,12000 or 14000.
+        Check that the tax allowance of a married couple is either 10000,12000 or 14000.
     */
     function echidna_valid_married_tax_allowance() public view returns (bool) {
         if (isMarried) {
             Taxpayer spObj = Taxpayer(spouseAddress());
-            try spObj.age() returns (uint spouseAge) {
-                if (spouseAge < 65) {
+            uint combined = getTaxAllowance() + spObj.getTaxAllowance();
+            return (combined == 10000 ||
+                combined == 12000 ||
+                combined == 14000);
+        }
+        return true;
+    }
+
+    // ASSIGNMENT PART 3
+
+    /** 
+        Check that the tax allowance of an unmarried taxpayer over 65 is always 7000.
+    */
+    function echidna_valid_tax_allowance_over_64() public view returns (bool) {
+        if (age >= 65 && !isMarried) {
+            return (getTaxAllowance() == 7000);
+        }
+        return true;
+    }
+
+    /** 
+        Check that the tax allowance of a married couple over 64 is always 14000.
+    */
+    function echidna_valid_married_tax_allowance_over_64()
+        public
+        view
+        returns (bool)
+    {
+        if (isMarried && age > 64) {
+            Taxpayer spObj = Taxpayer(spouseAddress());
+                if (spObj.age() > 64) {
                     uint combined = getTaxAllowance() + spObj.getTaxAllowance();
-                    return (combined == 10000 ||
-                        combined == 12000 ||
-                        combined == 14000);
+                    return (combined == 14000);
                 }
-            } catch {
-                return false;
-            }
         }
         return true;
     }
