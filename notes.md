@@ -12,6 +12,8 @@
             - If so, check if spouse is married to person
 - Assumption: monogamous marriage >> No marriage allowed if already married
 - Check that parent aren't allowed to be yourself and the same
+- Check that the contract can only be called by the owner?
+- Reciprocal marriage prompting?
 
 ## Results:
 - echidna_married_and_spouse_set_at_the_same_time: failed!💥  
