@@ -39,3 +39,12 @@ echidna_valid_tax_allowance: failed!💥
 
 # Task 3:
 - Check that lottery win doesn't influence the allowance for people over 64
+
+# Task 4:
+- Make lottery system accessible to echidna
+  - Idea: overload joinLottery function so that the lottery address is not randomly chosen, but instead given by an artificial lottery
+    - Reached instructions increased from 5800 to 6200 -> Echidna reaches deeper into contract logic
+  - Remove msg.sender requires in order for echidna to succesfully interact with the system as a EOA
+    - Instead, add checks that remember active lotteries or spouses based on the current contract variables
+- uint256 public rev in taxpayer.sol is a security risk, but it is necessary for successful fuzzing. In reality you would save your true number off the blockchain.
+

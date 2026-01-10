@@ -2,9 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "./Taxpayer.sol";
+import "./Lottery.sol";
 
 contract TestTaxpayer is Taxpayer {
     Taxpayer public candidate;
+    uint256 public period = 1000;
+    Lottery public l = new Lottery(period);
 
     constructor() Taxpayer(address(0x11), address(0x12)) {
         candidate = new Taxpayer(address(0x13), address(0x14));
@@ -160,5 +163,48 @@ contract TestTaxpayer is Taxpayer {
         }
     }
 
+    // ASSIGNMENT PART 4
 
+    /** 
+        Helper function for echidna to run lotteries.
+    */
+    function start_lottery() public {
+        l.startLottery();
+    }
+
+    /**
+        Overloaded version for Echidna to use the specific test lottery.
+    */
+    function joinLottery(uint256 r) public {
+        joinLottery(address(l), r);
+    }
+
+    /**
+        Parameterless reveal for Echidna. 
+        Uses the stored value from the contract state to ensure a successful reveal.
+    */
+    function revealLottery() public {
+        revealLottery(address(l), rev);
+    }
+
+    /**
+        Allows the candidate taxpayer to join the same lottery.
+    */
+    function joinLotteryCandidate(uint256 r) public {
+        candidate.joinLottery(address(l), r);
+    }
+
+    /**
+        Parameterless reveal for the candidate.
+    */
+    function revealLotteryCandidate() public {
+        candidate.revealLottery(address(l), candidate.rev());
+    }
+
+    /** 
+        Helper function for echidna to end lotteries.
+    */
+    function end_lottery() public {
+        l.endLottery();
+    }
 }

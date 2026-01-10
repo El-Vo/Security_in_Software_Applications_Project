@@ -27,9 +27,13 @@ contract Taxpayer {
 
     uint income;
 
-    uint256 rev;
+    uint256 public rev;
+
+    address public activeLottery;
 
     bool extended_tax_allowance;
+
+    bool participated_in_lottery;
 
     address constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
@@ -52,6 +56,7 @@ contract Taxpayer {
         tax_allowance = DEFAULT_ALLOWANCE;
         iscontract = true;
         extended_tax_allowance = false;
+        participated_in_lottery = false;
     }
 
     /**
@@ -128,11 +133,7 @@ contract Taxpayer {
         }
     }
 
-    function setTaxAllowance(uint ta) internal {
-        require(
-            Taxpayer(msg.sender).isContract() ||
-                Lottery(msg.sender).isContract()
-        );
+    function setTaxAllowance(uint ta) private {
         tax_allowance = ta;
     }
 
@@ -145,11 +146,14 @@ contract Taxpayer {
     }
 
     function setWonLottery() external {
-        require(Lottery(msg.sender).isContract());
+        require(
+            msg.sender == activeLottery,
+            "Only the active lottery can set a winner"
+        );
         setExtendedTaxAllowance();
     }
 
-    function setExtendedTaxAllowance() private {
+    function setExtendedTaxAllowance() internal {
         if (extended_tax_allowance) return;
         extended_tax_allowance = true;
         addTaxAllowance(ALLOWANCE_OAP - DEFAULT_ALLOWANCE);
@@ -157,6 +161,14 @@ contract Taxpayer {
 
     function hasExtendedTaxAllowance() public view returns (bool) {
         return extended_tax_allowance;
+    }
+
+    function hasParticipatedInLottery() public view returns (bool) {
+        return participated_in_lottery;
+    }
+
+    function setParticipatedInLottery() public {
+        participated_in_lottery = true;
     }
 
     function isMarriedState() public view returns (bool) {
@@ -172,12 +184,14 @@ contract Taxpayer {
     }
 
     function joinLottery(address lot, uint256 r) public {
-        // If the taxpayer has already participated, he/she cannot enter again.
-        if (hasExtendedTaxAllowance()) return;
+        // If the taxpayer has already participated or is too old, he/she cannot enter/win (again).
+        if (hasParticipatedInLottery() || hasExtendedTaxAllowance()) return;
 
         Lottery l = Lottery(lot);
         l.commit(keccak256(abi.encode(r)));
         rev = r;
+        activeLottery = lot;
+        setParticipatedInLottery();
     }
     function revealLottery(address lot, uint256 r) public {
         if (hasExtendedTaxAllowance()) return;
