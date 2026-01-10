@@ -21,18 +21,10 @@ contract Lottery {
     /// @notice Initializes the registry with the lottery period.
     /// @param p The duration of each phase in seconds.
     constructor(uint p) {
-        owner = msg.sender;
         period = p;
         startTime = 0;
         endTime = 0;
         round = 0;
-    }
-
-    /// @notice Changes the lottery period. Only callable by the owner.
-    /// @param p The new duration in seconds.
-    function setPeriod(uint p) public {
-        require(msg.sender == owner, "Only owner can set period");
-        period = p;
     }
 
     /// @notice Starts a new lottery round. Only possible if no lottery is currently active.
@@ -92,18 +84,5 @@ contract Lottery {
     /// @notice Returns the list of addresses that successfully revealed their secret.
     function getRevealedParticipants() public view returns (address[] memory) {
         return revealed;
-    }
-
-    /// @notice Returns the current lifecycle phase of the lottery.
-    function getCurrentPhase() public view returns (Phase) {
-        if (startTime == 0) {
-            return Phase.NotStarted;
-        } else if (block.timestamp < revealTime) {
-            return Phase.Commitment;
-        } else if (block.timestamp < endTime) {
-            return Phase.Reveal;
-        } else {
-            return Phase.Endable;
-        }
     }
 }

@@ -35,7 +35,7 @@
         {
             "label": "Echidna: Test Current File with Coverage",
             "type": "shell",
-            "command": "docker exec -it echidna-container echidna ${relativeFile} --contract ${input:contractName} --corpus-dir /src/coverage",
+            "command": "docker exec -it echidna-container echidna ${relativeFile} --contract ${input:contractName} --corpus-dir /src/echidna_coverage",
             "group": "test",
             "presentation": {
                 "reveal": "always",
