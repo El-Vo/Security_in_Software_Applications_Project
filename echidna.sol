@@ -61,11 +61,11 @@ contract TestTaxpayer is Taxpayer {
     /** 
         Helper functions to allow Echidna to interact with a valid contract.
     */
-    function marry_candidate() public {
+    function marryCandidate() public {
         marry(address(candidate));
     }
 
-    function divorce_candidate() public {
+    function divorceCandidate() public {
         divorce();
     }
 
@@ -75,7 +75,7 @@ contract TestTaxpayer is Taxpayer {
         Check that the tax allowance of an unmarried taxpayer under 65 who hasn't won the lottery is 5000.
     */
     function echidna_valid_tax_allowance() public view returns (bool) {
-        if (age < 65 && !isMarried && !hasExtendedTaxAllowance()) {
+        if (age < 65 && !isMarriedState() && !hasExtendedTaxAllowance()) {
             return (getTaxAllowance() == 5000);
         }
         return true;
@@ -85,7 +85,7 @@ contract TestTaxpayer is Taxpayer {
         Check that the tax allowance of an unmarried taxpayer under 65 who has won the lottery is 7000.
     */
     function echidna_valid_tax_allowance_winner() public view returns (bool) {
-        if (age < 65 && !isMarried && hasExtendedTaxAllowance()) {
+        if (age < 65 && !isMarriedState() && hasExtendedTaxAllowance()) {
             return (getTaxAllowance() == 7000);
         }
         return true;
@@ -106,7 +106,7 @@ contract TestTaxpayer is Taxpayer {
         Check that the tax allowance of a married couple is either 10000,12000 or 14000.
     */
     function echidna_valid_married_tax_allowance() public view returns (bool) {
-        if (isMarried) {
+        if (isMarriedState()) {
             Taxpayer spObj = Taxpayer(spouseAddress());
             uint combined = getTaxAllowance() + spObj.getTaxAllowance();
             return (combined == 10000 ||
@@ -122,7 +122,7 @@ contract TestTaxpayer is Taxpayer {
         Check that the tax allowance of an unmarried taxpayer over 65 is always 7000.
     */
     function echidna_valid_tax_allowance_over_64() public view returns (bool) {
-        if (age >= 65 && !isMarried) {
+        if (age >= 65 && !isMarriedState()) {
             return (getTaxAllowance() == 7000);
         }
         return true;
@@ -136,7 +136,7 @@ contract TestTaxpayer is Taxpayer {
         view
         returns (bool)
     {
-        if (isMarried && age > 64) {
+        if (isMarriedState() && age > 64) {
             Taxpayer spObj = Taxpayer(spouseAddress());
             if (spObj.age() > 64) {
                 uint combined = getTaxAllowance() + spObj.getTaxAllowance();
@@ -149,7 +149,7 @@ contract TestTaxpayer is Taxpayer {
     /** 
         Helper function for echidna to advance age more quickly.
     */
-    function advance_taxpayer_age() public {
+    function advanceTaxpayerAge() public {
         for (uint i = 0; i < 15; i++) {
             haveBirthday();
         }
@@ -158,7 +158,7 @@ contract TestTaxpayer is Taxpayer {
     /** 
         Helper function for echidna to advance age of spouse more quickly.
     */
-    function advance_taxpayer_spouse_age() public {
+    function advanceTaxpayerSpouseAge() public {
         for (uint i = 0; i < 15; i++) {
             Taxpayer(spouseAddress()).haveBirthday();
         }
@@ -169,7 +169,7 @@ contract TestTaxpayer is Taxpayer {
     /** 
         Helper function for echidna to run lotteries.
     */
-    function start_lottery() public {
+    function startLottery() public {
         l.startLottery();
     }
 
@@ -205,7 +205,7 @@ contract TestTaxpayer is Taxpayer {
     /** 
         Helper function for echidna to end lotteries.
     */
-    function end_lottery() public {
+    function endLottery() public {
         l.endLottery();
     }
 

@@ -8,7 +8,7 @@ contract Taxpayer {
 
     bool isMarried;
 
-    bool iscontract;
+    bool public isContract = true;
 
     /* Reference to spouse if person is married, address(0) otherwise */
     address spouse;
@@ -23,7 +23,7 @@ contract Taxpayer {
     uint constant ALLOWANCE_OAP = 7000;
 
     /* Income tax allowance */
-    uint tax_allowance;
+    uint taxAllowance;
 
     uint income;
 
@@ -31,7 +31,7 @@ contract Taxpayer {
 
     mapping(address => bool) public authorizedLotteries;
 
-    bool extended_tax_allowance;
+    bool extendedTaxAllowance;
 
     uint256 public lotteryWins;
 
@@ -53,27 +53,26 @@ contract Taxpayer {
         parent2 = p2;
         spouse = address(0);
         income = 0;
-        tax_allowance = DEFAULT_ALLOWANCE;
-        iscontract = true;
-        extended_tax_allowance = false;
+        taxAllowance = DEFAULT_ALLOWANCE;
+        extendedTaxAllowance = false;
     }
 
     /**
      * @dev Establishes a symmetrical marriage with another taxpayer.
      * Uses a reciprocal call to ensure both contracts reflect the marriage.
-     * @param new_spouse The address of the spouse's Taxpayer contract.
+     * @param newSpouse The address of the spouse's Taxpayer contract.
      */
-    function marry(address new_spouse) public onlyValidAddress(new_spouse) {
-        if (isMarried && spouse == new_spouse) return;
+    function marry(address newSpouse) public onlyValidAddress(newSpouse) {
+        if (isMarried && spouse == newSpouse) return;
         require(!isMarried, "Taxpayer is already married");
 
-        Taxpayer sp = Taxpayer(new_spouse);
+        Taxpayer sp = Taxpayer(newSpouse);
         require(
             !sp.isMarriedState() || sp.spouseAddress() == address(this),
             "Partner unavailable"
         );
 
-        spouse = new_spouse;
+        spouse = newSpouse;
         isMarried = true;
         sp.marry(address(this));
     }
@@ -85,7 +84,7 @@ contract Taxpayer {
     function divorce() public {
         if (!isMarried) return;
 
-        address oldSpouse = spouse;
+        address oldSpouseAddress = spouse;
         spouse = address(0);
         isMarried = false;
 
@@ -96,7 +95,7 @@ contract Taxpayer {
             setTaxAllowance(DEFAULT_ALLOWANCE);
         }
 
-        Taxpayer(oldSpouse).divorce();
+        Taxpayer(oldSpouseAddress).divorce();
     }
 
     /**
@@ -107,9 +106,9 @@ contract Taxpayer {
     function transferAllowance(uint change) public {
         require(isMarried, "Not married");
         require(change > 0, "Amount must be positive");
-        require(change <= tax_allowance, "Insufficient allowance");
+        require(change <= taxAllowance, "Insufficient allowance");
 
-        tax_allowance -= change;
+        taxAllowance -= change;
         Taxpayer(spouse).receiveAllowance(change);
     }
 
@@ -121,7 +120,7 @@ contract Taxpayer {
     function receiveAllowance(uint amount) external {
         require(isMarried, "Not married");
         require(msg.sender == spouse, "Only spouse can transfer allowance");
-        tax_allowance += amount;
+        taxAllowance += amount;
     }
 
     function haveBirthday() public {
@@ -133,15 +132,15 @@ contract Taxpayer {
     }
 
     function setTaxAllowance(uint ta) private {
-        tax_allowance = ta;
+        taxAllowance = ta;
     }
 
     function getTaxAllowance() public view returns (uint) {
-        return tax_allowance;
+        return taxAllowance;
     }
 
     function addTaxAllowance(uint ta) private {
-        tax_allowance = tax_allowance + ta;
+        taxAllowance = taxAllowance + ta;
     }
 
     function setWonLottery() external {
@@ -154,13 +153,13 @@ contract Taxpayer {
     }
 
     function setExtendedTaxAllowance() internal {
-        if (extended_tax_allowance) return;
-        extended_tax_allowance = true;
+        if (extendedTaxAllowance) return;
+        extendedTaxAllowance = true;
         addTaxAllowance(ALLOWANCE_OAP - DEFAULT_ALLOWANCE);
     }
 
     function hasExtendedTaxAllowance() public view returns (bool) {
-        return extended_tax_allowance;
+        return extendedTaxAllowance;
     }
 
     function isMarriedState() public view returns (bool) {
@@ -169,10 +168,6 @@ contract Taxpayer {
 
     function spouseAddress() public view returns (address) {
         return spouse;
-    }
-
-    function isContract() public view returns (bool) {
-        return iscontract;
     }
 
     function joinLottery(address lot, uint256 r) public {

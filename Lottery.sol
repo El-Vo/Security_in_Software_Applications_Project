@@ -3,6 +3,7 @@ pragma solidity ^0.8.22;
 import "Taxpayer.sol";
 
 contract Lottery {
+    enum Phase { NotStarted, Commitment, Reveal, Endable }
 
     address owner;
     uint256 public round;
@@ -11,34 +12,40 @@ contract Lottery {
     mapping(address => uint) reveals;
     address[] revealed;
 
-    uint256 startTime;
-    uint256 revealTime;
-    uint256 endTime;
-    uint256 period;
-    bool iscontract;
+    uint256 public startTime;
+    uint256 public revealTime;
+    uint256 public endTime;
+    uint256 public period;
+    bool public isContract = true;
 
-    // Initialize the registry with the lottery period.
+    /// @notice Initializes the registry with the lottery period.
+    /// @param p The duration of each phase in seconds.
     constructor(uint p) {
+        owner = msg.sender;
         period = p;
         startTime = 0;
         endTime = 0;
         round = 0;
-        iscontract = true;
     }
 
-    //If the lottery has not started, anyone can invoke a lottery.
+    /// @notice Changes the lottery period. Only callable by the owner.
+    /// @param p The new duration in seconds.
+    function setPeriod(uint p) public {
+        require(msg.sender == owner, "Only owner can set period");
+        period = p;
+    }
+
+    /// @notice Starts a new lottery round. Only possible if no lottery is currently active.
     function startLottery() public {
         require(startTime == 0);
         round++;
-        //startTime current time. Users send their committed value
         startTime = block.timestamp;
-        //revealTime  time for revealing. User reveal their value
         revealTime = startTime + period;
-        //endTime a winner can be computed
         endTime = revealTime + period;
     }
 
-    //A taxpayer send his own commitment.
+    /// @notice Commits a hidden value for the current lottery round.
+    /// @param y The keccak256 hash of the chosen secret.
     function commit(bytes32 y) public {
         require(startTime > 0 && block.timestamp < revealTime, "Commitment phase ended or not started");
         require(participantRound[msg.sender] < round, "Already committed in this round");
@@ -47,12 +54,12 @@ contract Lottery {
         commits[msg.sender] = y;
     }
 
-    //A valid taxpayer who sent his own commitment, sends the revealing value.
+    /// @notice Reveals the secret value to participate in the drawing.
+    /// @param rev The secret value that was hashed during the commitment phase.
     function reveal(uint256 rev) public {
         require(block.timestamp >= revealTime);
         require(keccak256(abi.encode(rev)) == commits[msg.sender]);
         
-        // Prevent duplicate participation in the same round
         for (uint i = 0; i < revealed.length; i++) {
             require(revealed[i] != msg.sender, "Already revealed");
         }
@@ -61,7 +68,8 @@ contract Lottery {
         reveals[msg.sender] = uint(rev);
     }
 
-    //Ends the lottery and compute the winner.
+    /// @notice Ends the lottery and notifies the winner's Taxpayer contract.
+    /// @dev Resets the state regardless of whether a winner was found.
     function endLottery() public {
         require(block.timestamp >= endTime);
         
@@ -80,11 +88,22 @@ contract Lottery {
         endTime = 0;
         delete revealed;
     }
-    function isContract() public view returns (bool) {
-        return iscontract;
-    }
 
+    /// @notice Returns the list of addresses that successfully revealed their secret.
     function getRevealedParticipants() public view returns (address[] memory) {
         return revealed;
+    }
+
+    /// @notice Returns the current lifecycle phase of the lottery.
+    function getCurrentPhase() public view returns (Phase) {
+        if (startTime == 0) {
+            return Phase.NotStarted;
+        } else if (block.timestamp < revealTime) {
+            return Phase.Commitment;
+        } else if (block.timestamp < endTime) {
+            return Phase.Reveal;
+        } else {
+            return Phase.Endable;
+        }
     }
 }
