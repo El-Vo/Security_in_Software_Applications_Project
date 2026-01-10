@@ -47,4 +47,11 @@ echidna_valid_tax_allowance: failed!💥
   - Remove msg.sender requires in order for echidna to succesfully interact with the system as a EOA
     - Instead, add checks that remember active lotteries or spouses based on the current contract variables
 - uint256 public rev in taxpayer.sol is a security risk, but it is necessary for successful fuzzing. In reality you would save your true number off the blockchain.
+- Lottery l.56: require(revealed[i] != msg.sender, "Already revealed"); isnt reached by echidna but can only be reached by a human entering the same value twice deliberately
+- Lottery l.85: function getRevealedParticipants() public view returns (address[] memory) {
+        return revealed; does not get marked as revealed because it is a view function. Actually, it does get called when the invariants echidna_lottery_no_duplicates() and echidna_lottery_participants_valid() are tested
+- Taxpayer l.232: return false; doesnt get reached because of strong check beforehand for code.length
+- Taxpayer l.195: revert("Address does not support lottery interface"); does not get reached because it is improbable that some other code lies at the address that does not support the
+  Address interface in out testing scenario
+  
 

@@ -207,4 +207,53 @@ contract TestTaxpayer is Taxpayer {
     function end_lottery() public {
         l.endLottery();
     }
+
+    /** 
+        Check that all participants in the lottery are valid Taxpayer contracts.
+        This prevents crashes during the winner notification call.
+    */
+    function echidna_lottery_participants_valid() public view returns (bool) {
+        address[] memory revList = l.getRevealedParticipants();
+        for (uint i = 0; i < revList.length; i++) {
+            if (revList[i].code.length == 0) return false;
+            try Taxpayer(revList[i]).isContract() returns (bool isTax) {
+                if (!isTax) return false;
+            } catch {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** 
+        Check for honest behavior: A participant should not be in the revealed list multiple times.
+        Duplicates bias the winning probability (total % n).
+    */
+    function echidna_lottery_no_duplicates() public view returns (bool) {
+        address[] memory revList = l.getRevealedParticipants();
+        for (uint i = 0; i < revList.length; i++) {
+            for (uint j = i + 1; j < revList.length; j++) {
+                if (revList[i] == revList[j]) return false;
+            }
+        }
+        return true;
+    }
+
+    /** 
+        Check that the lottery is unbiased over many rounds.
+        In a fair lottery with two equal participants (this and candidate), 
+        the win count difference should not grow excessively large.
+    */
+    function echidna_lottery_fairness() public view returns (bool) {
+        uint256 w1 = lotteryWins;
+        uint256 w2 = candidate.lotteryWins();
+        
+        // After at least some lotteries have been won
+        if (w1 + w2 > 10) {
+            uint256 diff = w1 > w2 ? w1 - w2 : w2 - w1;
+            // A difference of more than 80% of total wins indicates high bias 
+            return (diff * 10 < (w1 + w2) * 8); 
+        }
+        return true;
+    }
 }

@@ -29,11 +29,13 @@ contract Taxpayer {
 
     uint256 public rev;
 
-    address public activeLottery;
+    mapping(address => bool) public authorizedLotteries;
 
     bool extended_tax_allowance;
 
     bool participated_in_lottery;
+
+    uint256 public lotteryWins;
 
     address constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
@@ -147,9 +149,10 @@ contract Taxpayer {
 
     function setWonLottery() external {
         require(
-            msg.sender == activeLottery,
-            "Only the active lottery can set a winner"
+            authorizedLotteries[msg.sender],
+            "Only an authorized lottery can notify win"
         );
+        lotteryWins++;
         setExtendedTaxAllowance();
     }
 
@@ -167,8 +170,8 @@ contract Taxpayer {
         return participated_in_lottery;
     }
 
-    function setParticipatedInLottery() public {
-        participated_in_lottery = true;
+    function setParticipatedInLottery(bool participation) public {
+        participated_in_lottery = participation;
     }
 
     function isMarriedState() public view returns (bool) {
@@ -184,20 +187,22 @@ contract Taxpayer {
     }
 
     function joinLottery(address lot, uint256 r) public {
-        // If the taxpayer has already participated or is too old, he/she cannot enter/win (again).
-        if (hasParticipatedInLottery() || hasExtendedTaxAllowance()) return;
+        Lottery lObj = Lottery(lot);
+        // Check if it is a lottery contract
+        try lObj.isContract() returns (bool isLot) {
+            require(isLot, "Address is not a lottery contract");
+        } catch {
+            revert("Address does not support lottery interface");
+        }
 
-        Lottery l = Lottery(lot);
-        l.commit(keccak256(abi.encode(r)));
+        lObj.commit(keccak256(abi.encode(r)));
         rev = r;
-        activeLottery = lot;
-        setParticipatedInLottery();
+        authorizedLotteries[lot] = true;
+        participated_in_lottery = true;
     }
     function revealLottery(address lot, uint256 r) public {
-        if (hasExtendedTaxAllowance()) return;
-
-        Lottery l = Lottery(lot);
-        l.reveal(r);
+        Lottery lObj = Lottery(lot);
+        lObj.reveal(r);
         rev = 0;
     }
 
