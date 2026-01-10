@@ -6,7 +6,8 @@ import "./Lottery.sol";
 
 contract TestTaxpayer is Taxpayer {
     Taxpayer public candidate;
-    uint256 public period = 1000;
+    // Define lottery periods as 10 seconds per default
+    uint256 public period = 10;
     Lottery public l = new Lottery(period);
 
     constructor() Taxpayer(address(0x11), address(0x12)) {

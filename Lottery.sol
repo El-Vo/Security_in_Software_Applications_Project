@@ -3,6 +3,7 @@ pragma solidity ^0.8.22;
 import "Taxpayer.sol";
 
 contract Lottery {
+
     address owner;
     uint256 public round;
     mapping(address => uint256) public participantRound;
@@ -63,16 +64,17 @@ contract Lottery {
     //Ends the lottery and compute the winner.
     function endLottery() public {
         require(block.timestamp >= endTime);
-        require(revealed.length > 0, "No participants");
         
-        uint total = 0;
-        for (uint i = 0; i < revealed.length; i++) {
-            total += reveals[revealed[i]];
+        if (revealed.length > 0) {
+            uint total = 0;
+            for (uint i = 0; i < revealed.length; i++) {
+                total += reveals[revealed[i]];
+            }
+            
+            Taxpayer(revealed[total % revealed.length]).setWonLottery();
         }
         
-        Taxpayer(revealed[total % revealed.length]).setWonLottery();
-        
-        // Reset state for the next lottery round
+        // Always reset state for the next lottery round
         startTime = 0;
         revealTime = 0;
         endTime = 0;

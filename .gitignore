@@ -5,3 +5,4 @@ artifacts/*
 .states/*
 .prettierrc.json
 coverage*/*
+scenario.json

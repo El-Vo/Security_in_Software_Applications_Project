@@ -33,8 +33,6 @@ contract Taxpayer {
 
     bool extended_tax_allowance;
 
-    bool participated_in_lottery;
-
     uint256 public lotteryWins;
 
     address constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
@@ -58,7 +56,6 @@ contract Taxpayer {
         tax_allowance = DEFAULT_ALLOWANCE;
         iscontract = true;
         extended_tax_allowance = false;
-        participated_in_lottery = false;
     }
 
     /**
@@ -166,14 +163,6 @@ contract Taxpayer {
         return extended_tax_allowance;
     }
 
-    function hasParticipatedInLottery() public view returns (bool) {
-        return participated_in_lottery;
-    }
-
-    function setParticipatedInLottery(bool participation) public {
-        participated_in_lottery = participation;
-    }
-
     function isMarriedState() public view returns (bool) {
         return isMarried;
     }
@@ -198,7 +187,6 @@ contract Taxpayer {
         lObj.commit(keccak256(abi.encode(r)));
         rev = r;
         authorizedLotteries[lot] = true;
-        participated_in_lottery = true;
     }
     function revealLottery(address lot, uint256 r) public {
         Lottery lObj = Lottery(lot);
