@@ -1,0 +1,23 @@
+\section{Introduction}
+\label{sec:intro}
+
+
+
+This report details a project regarding the property-based fuzzing of smart contracts. Specifically, echidna was used to assert the correctness of the program logic by defining invariants that encapsulate the logical assumptions of the underlying algorithm. Two smart contracts, Taxpayer.sol and Lottery.sol, were examined. Taxpayer.sol provides the logic to manage tax-related variables of individuals as well as their marital status. Lottery.sol models a lottery based on a commit-and-reveal schema.
+
+%-------------------------------------------------------------------------
+\subsection{Fuzzing}
+Manès et al. define Fuzzing as the following: 
+\begin{quote}
+    Fuzzing is the execution of the PUT [Program Under Test] using input(s) sampled from an input space (the ``fuzz input space'') that protrudes the expected input space of the PUT \cite{manes2019art}.
+\end{quote}
+
+They explain further that "fuzz testing" can be used to examine if a program violates the logical and safety constraints it is designed to fulfill. This is accomplished by using inputs to the algorithm that may be unexpected \cite{manes2019art}.
+
+%-------------------------------------------------------------------------
+\subsection{Property based fuzzing using echidna}
+- What is echidna?
+- What are properties?
+- How can echidna help you as a developer?
+
+
