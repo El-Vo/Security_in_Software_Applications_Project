@@ -1,2 +1,48 @@
-\section{Part 2}
+\section{Part 2: Tax allowance}
 \label{sec:3_part_two}
+
+The second part of the project introduces an income tax allowance system. It states that every taxpayer has a standard tax allowance of 5000. Married couples are able to swap their allowance freely. In the standard implementation, every taxpayer has access to the public function transferAllowance(). It deducts an arbitrary value from its own tax allowance and adds it to the allowance of its spouse.
+
+%-------------------------------------------------------------------------
+\subsection{Invariants}
+
+The Echidna properties for this subtask were designed to address four problems. Firstly, the allowance of an unmarried individual younger than 65 that hasn't won a lottery must be exactly 5000. Secondly, unmarried taxpayers under 65 that have won the lottery at some point must have an allowance of exactly 7000. Third, the allowance of a taxpayer must never go below zero. Fourth, the combined allowance of married couples must either be 10000, 12000 or 14000 to account for lottery wins.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=76, lastline=81, caption={Invariant to monitor the default tax allowance in Taxpayer.sol}, label={lst:tax-allowance-default} ]{../../echidna.sol}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=86, lastline=91, caption={Invariant to monitor the extended tax allowance in Taxpayer.sol}, label={lst:tax-allowance-default} ]{../../echidna.sol}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=96, lastline=98, caption={Invariant to monitor that tax allowance never goes below zero in Taxpayer.sol}, label={lst:tax-allowance-default} ]{../../echidna.sol}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=103, lastline=110, caption={Invariant to monitors the combined tax allowance of married couples in Taxpayer.sol}, label={lst:tax-allowance-default} ]{../../echidna.sol}
+\end{minipage}
+
+%-------------------------------------------------------------------------
+\subsection{Code improvements}
+
+An important factor in fulfilling the invariants defined above lies in the function visibility. By the given default, not only is transferAllowance() public, but also the setter function setTaxAllowance(). This allows for the tax allowance to be set to an arbitrary number by anyone. A naive approach to this problem is to set all variables and functions related to a Taxpayers tax allowance to private. This creates a new problem, because it is then no longer possible to control the tax allowance of the spouse in the case of married couples.
+
+The solution presented in this report splits the transferAllowance() function into two parts: transferAllowance() and receiveAllowance().
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=100, lastline=107, caption={Function to send allowance to spouse in Taxpayer.sol}, label={lst:tax-allowance-default} ]{../../Taxpayer.sol}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=114, lastline=118, caption={Function to receive allowance from spouse Taxpayer.sol}, label={lst:tax-allowance-default} ]{../../Taxpayer.sol}
+\end{minipage}
+
+Security consideration: transferAllowance made internal

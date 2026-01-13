@@ -1,7 +1,7 @@
 \section{Part 1: Taxpayer marriage}
 \label{sec:2_part_one}
 
-Part 1 of the assignment deals with the marriage of tax-paying individuals. By default, every \texttt{Taxpayer} has access to the two functions \texttt{marry()} and \texttt{divorce()}. They track their marriage state using a boolean value \texttt{isMarried} and the address variable \texttt{spouse}, which points to the address of their spouse \texttt{Taxpayer} contract on the blockchain. In its initial form, \texttt{marry()} sets \texttt{isMarried = true} and records whichever address was given as the spousal address. \texttt{divorce()} does the opposite: it sets \texttt{isMarried = false} and the \texttt{spouse} address to the empty \texttt{address(0)}.
+Part one of the assignment deals with the marriage of tax-paying individuals. By default, every \texttt{Taxpayer} has access to the two functions \texttt{marry()} and \texttt{divorce()}. They track their marriage state using a boolean value \texttt{isMarried} and the address variable \texttt{spouse}, which points to the address of their spouse \texttt{Taxpayer} contract on the blockchain. In its initial form, \texttt{marry()} sets \texttt{isMarried = true} and records whichever address was given as the spousal address. \texttt{divorce()} does the opposite: it sets \texttt{isMarried = false} and the \texttt{spouse} address to the empty \texttt{address(0)}.
 
 %-------------------------------------------------------------------------
 \subsection{Invariants}
@@ -20,7 +20,7 @@ The second invariant is shown in Listing \ref{lst:state-consistency}. It checks 
   \lstinputlisting[ language=Solidity, firstline=31, lastline=43, caption={Invariant to ensure marriage-symmetry in Taxpayer.sol}, label={lst:marriage-symmetry} ]{../../echidna.sol}
 \end{minipage}
 
-The third invariant checks the condition that two married taxpayers have to be correctly assigned to each other. Therefore, it returns \texttt{false} if any spouse is set to \texttt{isMarried = false} or the addresses of their respective \texttt{spouse} variables do not point to each of the \texttt{Taxpayer} contracts representing them.
+The third invariant (as shown in Listing \ref{lst:marriage-symmetry}) checks the condition that two married taxpayers have to be correctly assigned to each other. Therefore, it returns \texttt{false} if any spouse is set to \texttt{isMarried = false} or the addresses of their respective \texttt{spouse} variables do not point to each of the \texttt{Taxpayer} contracts representing them.
 
 To increase code coverage by Echidna, an additional \texttt{Taxpayer} object is created in the constructor. Without the creation of another \texttt{Taxpayer} as a helper, it would not be possible for Echidna to trigger a successful marriage between two \texttt{Taxpayers} due to only one existing in the system. Furthermore, a helper function was added to marry the two respective \texttt{Taxpayer} objects more easily. Otherwise, Echidna would need to guess the exact address of the second \texttt{Taxpayer} object, which is mathematically very unlikely.
 

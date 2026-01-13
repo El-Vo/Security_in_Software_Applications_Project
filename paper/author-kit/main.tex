@@ -1,9 +1,9 @@
 % CVPR 2026 Paper Template; see https://github.com/cvpr-org/author-kit
 
-\documentclass[10pt,twocolumn,letterpaper]{article}
+\documentclass[10pt, twocolumn, letterpaper]{article}
 
 %%%%%%%%% PAPER TYPE  - PLEASE UPDATE FOR FINAL VERSION
- \usepackage{cvpr}              % To produce the CAMERA-READY version
+\usepackage{cvpr} % To produce the CAMERA-READY version
 %\usepackage[review]{cvpr}      % To produce the REVIEW version
 % \usepackage[pagenumbers]{cvpr} % To force page numbers, e.g. for an arXiv version
 
@@ -12,13 +12,13 @@
 
 % It is strongly recommended to use hyperref, especially for the review version.
 % hyperref with option pagebackref eases the reviewers' job.
-% Please disable hyperref *only* if you encounter grave issues, 
+% Please disable hyperref *only* if you encounter grave issues,
 % e.g. with the file validation for the camera-ready version.
 %
 % If you comment hyperref and then uncomment it, you should delete *.aux before re-running LaTeX.
 % (Or just hit 'q' on the first LaTeX run, let it finish, and you should be clear).
 \definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
-\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+\usepackage[pagebackref, breaklinks, colorlinks, allcolors=cvprblue]{hyperref}
 
 %%%%%%%%% PAPER ID  - PLEASE UPDATE
 \def\paperID{1} % *** Enter the Paper ID here
@@ -29,8 +29,7 @@
 \title{\confName~Project report}
 
 %%%%%%%%% AUTHORS - PLEASE UPDATE
-\author{Elias Vollrath\\
-2245095\\
+\author{Elias Vollrath\\ 2245095\\
 % For a paper whose authors are all at the same institution,
 % omit the following lines up until the closing ``}''.
 % Additional authors and addresses can be added with ``\and'',
@@ -39,19 +38,14 @@
 }
 
 \begin{document}
-\maketitle  
-\input{sec/1_intro}
-\input{sec/2_part_one}
-\input{sec/3_part_two}
-\input{sec/4_part_three}
-\input{sec/5_part_four}
-{
-    \small
-    \bibliographystyle{ieeenat_fullname}
-    \bibliography{main}
-}
+  \maketitle
+  \input{sec/1_intro}
+  \input{sec/2_part_one}
+  \input{sec/3_part_two}
+  \input{sec/4_part_three}
+  \input{sec/5_part_four}
+  { \small \bibliographystyle{ieeenat_fullname} \bibliography{main} }
 
-% WARNING: do not forget to delete the supplementary pages from your submission 
-% \input{sec/X_suppl}
-
+  % WARNING: do not forget to delete the supplementary pages from your submission
+  % \input{sec/X_suppl}
 \end{document}

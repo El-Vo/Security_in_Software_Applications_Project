@@ -23,7 +23,7 @@ contract Taxpayer {
   uint constant ALLOWANCE_OAP = 7000;
 
   /* Income tax allowance */
-  uint taxAllowance;
+  uint private taxAllowance;
 
   uint income;
 
@@ -114,7 +114,7 @@ contract Taxpayer {
   function receiveAllowance(uint amount) external {
     require(isMarried, "Not married");
     require(msg.sender == spouse, "Only spouse can transfer allowance");
-    taxAllowance += amount;
+    addTaxAllowance(amount);
   }
 
   function haveBirthday() public {
