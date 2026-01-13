@@ -6,3 +6,19 @@ artifacts/*
 .prettierrc.json
 coverage*/*
 scenario.json
+
+# LaTeX generated files
+paper/author-kit/*.aux
+paper/author-kit/*.bbl
+paper/author-kit/*.blg
+paper/author-kit/*.brf
+paper/author-kit/*.fdb_latexmk
+paper/author-kit/*.fls
+paper/author-kit/*.log
+paper/author-kit/*.out
+paper/author-kit/*.pdf
+paper/author-kit/*.synctex.gz
+
+node_modules/*
+.vscode/ltex.dictionary.en-US.txt
+paper/author-kit/sec/old_1_intro.tex

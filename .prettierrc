@@ -1,0 +1,20 @@
+{
+  "tabWidth": 2,
+  "useTabs": false,
+  "printWidth": 1000,
+  "plugins": ["prettier-plugin-solidity", "prettier-plugin-latex"],
+  "overrides": [
+    {
+      "files": "*.sol",
+      "options": {
+        "tabWidth": 2
+      }
+    },
+    {
+      "files": "*.tex",
+      "options": {
+        "tabWidth": 2
+      }
+    }
+  ]
+}

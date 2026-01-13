@@ -48,3 +48,54 @@
 %%
 % \usepackage{soul}
 % \setuldepth{foobar}
+
+\usepackage{listings}
+\usepackage{lstautogobble}
+\usepackage{xcolor}
+
+\definecolor{vscodelightblue}{RGB}{0,112,193}
+\definecolor{vscodepink}{RGB}{175,0,219}
+\definecolor{vscodeteal}{RGB}{38,127,153}
+\definecolor{vscodegold}{RGB}{121,94,38}
+\definecolor{vscodegreen}{RGB}{0,128,0}
+\definecolor{backcolour}{rgb}{0.98,0.98,0.97}
+
+\lstdefinelanguage{Solidity}{
+    keywords={break, case, catch, continue, debugger, default, delete, do, else, finally, for, function, if, in, instanceof, new, switch, throw, try, typeof, var, void, while, with, as, constant, export, extends, import, label, module, super, abstract, any, constructor, declare, get, is, let, namespace, package, private, protected, public, readonly, set, static, string, symbol, type, from, of, asset, contract, enum, event, external, factory, indexed, library, modifier, storage, struct, view, pure, payable, mapping, returns, receive, fallback},
+    keywordstyle=\color{vscodelightblue},
+    morekeywords=[2]{return},
+    keywordstyle=[2]\color{vscodepink},
+    morekeywords=[3]{address, bool, byte, bytes, int, uint, fixed, ufixed, uint8, uint16, uint32, uint64, uint128, uint256, int8, int16, int32, int64, int128, int256, this},
+    keywordstyle=[3]\color{vscodeteal},
+    identifierstyle=\color{black},
+    sensitive=false,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{vscodegreen}\ttfamily,
+    stringstyle=\color{red}\ttfamily,
+    morestring=[b]',
+    morestring=[b]"
+}
+
+\lstset{
+    language=Solidity,
+    backgroundcolor=\color{backcolour},   
+    basicstyle=\ttfamily\footnotesize\color{black},
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=3pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{lightgray},
+    columns=flexible,
+    xleftmargin=1.5em,
+    framexleftmargin=1.2em,
+    autogobble=true,
+    gobble=4
+}

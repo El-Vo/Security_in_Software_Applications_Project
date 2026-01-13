@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "prettier": "^3.7.4",
+    "prettier-plugin-latex": "^2.0.1",
+    "prettier-plugin-solidity": "^2.2.1"
+  }
+}

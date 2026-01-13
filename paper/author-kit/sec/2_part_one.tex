@@ -1,3 +1,51 @@
-\section{Part 1}
-\label{sec:formatting}
+\section{Part 1: Taxpayer marriage}
+\label{sec:2_part_one}
 
+Part 1 of the assignment deals with the marriage of tax-paying individuals. By default, every taxpayer has access to the two functions marry() and divorce(). They track their marriage state using a boolean value isMarried and the address variable spouse, which points to the address of their spouse taxpayer contract on the blockchain. In its initial form, marry() sets isMarried = true and records whichever address was given as the spousal address. divorce() does the opposite, it sets isMarried= false and the spouse address to the empty zero-address.
+
+%-------------------------------------------------------------------------
+\subsection{Invariants}
+
+For the purposes of this exercise, only monogamous marriages are allowed between valid Taxpayers. The goal is to make sure that marriages are correctly assigned to each spouse. For this reason, three invariants were defined. The first invariant is shown in Listing \ref{lst:no-self-marriage}. It allows Echidna to assert that no taxpayer is allowed to marry himself/herself after any given transaction.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=23, lastline=25, caption={Invariant to ensure state consistency in Taxpayer.sol}, label={lst:state-consistency} ]{../../echidna.sol}
+\end{minipage}
+
+The second invariant is shown in Listing \ref{lst:state-consistency}. It checks that the marriage-related variables isMarried and spouse are always set in conjunction to each other. It highlights problems where a Taxpayer could be in the state "married" (isMarried = true) while the spouse address could be set to the zero-address (spouse= address(0)).
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=31, lastline=43, caption={Invariant to ensure marriage symmetry in Taxpayer.sol}, label={lst:marriage-symmetry} ]{../../echidna.sol}
+\end{minipage}
+
+The third invariant checks the condition that two married taxpayers have to be correctly assigned to each other. Therefore, it returns false if any spouse is set to isMarried = false or the addresses of their respective spouse variables do not point to each of the Taxpayer contracts representing them.
+
+To increase code coverage by Echidna, an additional Taxpayer object is created in the constructor. Without the artificial creation of another Taxpayer helper functions, it wouldn't be possible for Echidna to trigger a successful marriage between two Taxpayers due to only one existing in the system. Furthermore, a helper function was added to marry the two respective Taxpayer objects more easily. Otherwise, Echidna would need to guess the exact address of the second Taxpayer object which is mathematically very unlikely.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=63, lastline=66, caption={Helper functions for simulating the marriage logic in echidna.sol}, label={lst:marriage-helper} ]{../../echidna.sol}
+\end{minipage}
+
+%-------------------------------------------------------------------------
+\subsection{Code improvements}
+
+While invariants defined as functions allow Echidna to highlight flaws in the programming logic, they can only be fixed by manipulating the original code. At first, a modifier was added to Taxpayer.sol which checks to validity of a proposed spouse address. When the marry() function gets called, it runs the isValidSpouseAddress() function first.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=190, lastline=201, caption={Validation of proposed spouse addresses}, label={lst:address-validation} ]{../../Taxpayer.sol}
+\end{minipage}
+
+The validation function from Listing \ref{lst:address-validation} filters numerous reserved addresses from zero to nine as well as the own address of the Taxpayer object. Furthermore, it checks the code length behind a given address. This enables it to sort out addresses that do not contain any kind of object. Lastly, it tries to cast the address into a Taxpayer object and call the isContract() function. If all checks pass, the address is successfully identified as another Taxpayer object.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=62, lastline=72, caption={Marriage function in Taxpayer.sol}, label={lst:marriage} ]{../../Taxpayer.sol}
+\end{minipage}
+
+The marriage function (shown in Listing \ref{lst:marriage}) was extended so that it would prevent the marriage of two taxpayers where either one is already married. In addition to this, a recursion has been set up so that the spouse sets its marriage status according to the calling Taxpayer object. The divorce() function is set up similarly where it triggers a reset of the marriage status for both spouses.
+
+At the end of this chapter, some considerations for further development are provided that were deemed out-of-scope for the task at hand. Currently, the functions marry() and divorce() are publicly accessible and can therefore be called by anyone with the address of the Taxpayer contract. In a real application, it would be more secure to only allow access to these functions by the owner of the smart contract. Secondly, it is currently not prohibited to marry your own parents, provided that they are not married to each other.
