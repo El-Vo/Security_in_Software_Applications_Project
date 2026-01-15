@@ -5,5 +5,16 @@ With the code adjustments presented in the assignment, every defined Echidna pro
 
 \noindent
 \begin{minipage}{\linewidth}
-  \lstinputlisting[ language=Solidity, firstline=250, lastline=273, caption={Up-to-date results of Echidna running on echidna.sol}, label={lst:results} ]{../../echidna.sol}
+  \lstinputlisting[ language=Solidity, firstline=250, lastline=273, caption={Up-to-date results of Echidna running on \texttt{echidna.sol}}, label={lst:results} ]{../../echidna.sol}
 \end{minipage}
+
+%-------------------------------------------------------------------------
+\subsection{Echidna coverage report}
+
+To evaluate the effectiveness of the fuzzing process, a comprehensive coverage report was generated. This report provides a detailed visualization of which branches and instructions were reached during the analysis. The report shows that the entire central program logic is reached by Echidna during testing. The following paragraph illustrates some of the few missing lines of coverage.
+
+In \texttt{Lottery.sol}, line 56 is not reached by Echidna because Echidna does not perform identical valid reveals within a single round, which would require a human deliberately entering the same value twice. The function \texttt{getRevealedParticipants()} (line~85) is marked as unreached because it is a \texttt{view} function, despite actually being called when the invariants \texttt{echidna\_lottery\_no\_duplicates()} and \texttt{echidna\_lottery\_participants\_valid()} are tested. In \texttt{Taxpayer.sol}, the \texttt{return false} statement (line~232) remains unreached due to the strict \texttt{code.length} check beforehand, and the \texttt{revert} in line 195 is not triggered because it is improbable that some other code lies at the address that does not support the interface in our testing scenario.
+
+An interactive version of the coverage report is hosted externally and can be accessed via the following link.\footnote{\url{https://el-vo.github.io/Security_in_Software_Applications_Project/}}
+
+\qrcode[height=2cm]{https://el-vo.github.io/Security_in_Software_Applications_Project/}
