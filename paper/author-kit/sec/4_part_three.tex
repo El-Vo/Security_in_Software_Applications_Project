@@ -60,4 +60,11 @@ The setter as shown in Listing \ref{lst:set-extended-tax-allowance} is purposefu
   \lstinputlisting[ language=Solidity, firstline=136, lastline=138, caption={Add tax allowance in Taxpayer.sol}, label={lst:add-tax-allowance} ]{../../Taxpayer.sol}
 \end{minipage}
 
-For this reason, the \texttt{private} helper function \texttt{addTaxAllowance} (Listing \ref{lst:add-tax-allowance}) was added. Regarding additional security concerns, a similar access control problem to part 2 can be identified. Since the \texttt{haveBirthday()} function is public with no further checks for owner privileges, anyone could increase the birthday of an individual taxpayer provided he or she has access to their address. Especially in the case of tracking the age of an individual, the progression of birthdays should ideally be handled in a fully automatic process. Additionally, it would be beneficial to track the exact birthdate of a \texttt{Taxpayer} in order to allow for an accurate age tracking.
+For this reason, the \texttt{private} helper function \texttt{addTaxAllowance()} (Listing \ref{lst:add-tax-allowance}) was added. If two Taxpayers divorce, the extended tax allowance must return to the Taxpayer(s) that won the lottery in the first place. To ensure that this is the case, the divorce() function was modified to reset each spouses tax allowance correctly (see Listing \ref{lst:divorce}):
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=78, lastline=93, caption={Divorce married couples in Taxpayer.sol}, label={lst:divorce} ]{../../Taxpayer.sol}
+\end{minipage}
+
+Regarding additional security concerns, a similar access control problem to part 2 can be identified. Since the \texttt{haveBirthday()} function is public with no further checks for owner privileges, anyone could increase the birthday of an individual taxpayer provided he or she has access to their address. Especially in the case of tracking the age of an individual, the progression of birthdays should ideally be handled in a fully automatic process. Additionally, it would be beneficial to track the exact birthdate of a \texttt{Taxpayer} in order to allow for an accurate age tracking.

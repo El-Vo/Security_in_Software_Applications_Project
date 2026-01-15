@@ -1,8 +1,134 @@
 \section{Part 4: Lottery}
 \label{sec:5_part_four}
 
+Part four of the assignment introduces a recurring lottery system for Taxpayers under the age of 65. Because it is government-issued, the assumption was made that multiple lotteries can run after each other, but not at the same time. The lottery logic is handled in an external file called Lottery.sol. It is based on a commit-and-reveal protocol, where Taxpayers can participate by entering their winning number disguised by a hashing function. Later on, all committed participants reveal their number and a winner is chosen by its position in the array of participants. The winning position is calculated by sumOfAllRevealedNumbers\%numberOfParticipants. The prize of the lottery is the indefinite extension of a Taxpayers tax allowance from 5000 to 7000.
+
 %-------------------------------------------------------------------------
 \subsection{Invariants}
 
+The goal of the invariants defined here is to ensure a safe and unbiased lottery process. To achieve this, three invariants have been defined.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=205, lastline=216, caption={Ensure only valid lottery entries in echidna.sol}, label={lst:lottery-only-valid-entries} ]{../../echidna.sol}
+\end{minipage}
+
+The first invariant (see Listing \ref{lst:lottery-only-valid-entries}) checks that only Taxpayer smart contracts are allowed to enter the lottery. This is done by calling the isContract() function of every listed participant in an artificially created Lottery object l. Since in our scenario, only the Taxpayer contract and the Lottery contract implemented this function, other objects trying to enter the lottery would lead to a rejection of the invariant.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=222, lastline=230, caption={Ensure no duplicate lottery entries in echidna.sol}, label={lst:lottery-no-duplicates} ]{../../echidna.sol}
+\end{minipage}
+
+The second invariant (see Listing \ref{lst:lottery-no-duplicates}) ensures that no participant was able to assign itself multiple times to the same lottery and therefore has no opportunity to skew the results in its favor. This is done by comparing the addresses of the participants with each other. If two participant entries match, a Taxpayer managed to enter the lottery twice and manipulates the result.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=237, lastline=248, caption={Ensure equal win distribution in echidna.sol}, label={lst:lottery-win-equality} ]{../../echidna.sol}
+\end{minipage}
+
+The third invariant was designed to track the winning probabilities of each lottery participant. Since there are only two participants in our simulation, each participating Taxpayer tracks its lottery wins by counting them. If at least 10 lotteries were simulated, the difference between the win counts is evaluated. As soon as the difference exceeds 80\%, a high bias is attested and the lottery is regarded as unfair.
+
+To successfully simulate lotteries using echidna, a handful of helper functions have been implemented. By default, it is near impossible for Echidna to simulate a complete lottery because it would need to insert the same lottery object address and entry-value multiple times. This is mathematically very unlikely. Additionally, the class inside the Lottery.sol file is not checked by Echidna, because it focuses on the Taxpayer according to the test configuration. This means that Echidna will never instruct a Lottery object by itself to conduct a new lottery. To resolve these issues, a Lottery object is created in echidna.sol, which is then used to run multiple lotteries (see Listing \ref{lst:constructor} for definition of testing class).
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=7, lastline=15, caption={Testing setup for Echidna testing object in echidna.sol}, label={lst:constructor} ]{../../echidna.sol}
+\end{minipage}
+
+To begin, Echidna needs to be able to control the different lottery phase changes (1) notStarted, (2) Commitment, (3) Reveal, (4) Endable.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=161, lastline=163, caption={Start the lottery in echidna.sol}, label={lst:start-lottery} ]{../../echidna.sol}
+\end{minipage}
+
+The function startLottery() as shown in Listing \ref{lst:start-lottery} uses the global public Lottery object to begin the lottery and change from phase (1) to (2) with a defined waiting time of ten seconds. After this time, the lottery phase changes from (2) to (3), again for ten seconds. During this time, commitments are no longer accepted. Instead, participants can reveal their commitments to get added to the revealed participant pool.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=197, lastline=199, caption={End the lottery in echidna.sol}, label={lst:end-lottery} ]{../../echidna.sol}
+\end{minipage}
+
+As soon as all time slots have passed and the Lottery object has reached phase (4), it can be ended by calling the helper function endLottery() (see Listing \ref{lst:end-lottery}).
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=168, lastline=170, caption={Join lottery as main Taxpayer in echidna.sol}, label={lst:join-lottery} ]{../../echidna.sol}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=176, lastline=178, caption={Reveal main Taxpayer lottery entry in echidna.sol}, label={lst:reveal-lottery} ]{../../echidna.sol}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=183, lastline=185, caption={Join lottery as spouse in echidna.sol}, label={lst:join-lottery-spouse} ]{../../echidna.sol}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=190, lastline=192, caption={Reveal spouse lottery entry in echidna.sol}, label={lst:reveal-lottery-spouse} ]{../../echidna.sol}
+\end{minipage}
+
+Both commitment helper functions shown in Listing \ref{lst:join-lottery} and \ref{lst:join-lottery-spouse} are set up to accept a random entry number, which then gets saved to the respective Taxpayer object as the variable rev. Each reveal helper function (Listing \ref{lst:reveal-lottery} and \ref{lst:reveal-lottery-spouse}) then fill in the initially committed value automatically.
+
 %-------------------------------------------------------------------------
 \subsection{Code improvements}
+
+The Taxpayer functions joinLottery() and revealLottery() remain largely unchanged. Two modifications were made in joinLottery(). At first, a check was implemented that the casting of address variable lot actually points to a valid lottery object that implements isContract() (as shown in Listing \ref{lst:join-lottery-taxpayer}). Second, the address of the current lottery gets saved to a mapping of addresses to boolean values authorizedLotteries[], where it can later be used to associate lottery winnings to legitimate participations.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=164, lastline=174, caption={Join lottery in Taxpayer.sol}, label={lst:join-lottery-taxpayer} ]{../../Taxpayer.sol}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=140, lastline=144, caption={Setter for won lotteries in Taxpayer.sol}, label={lst:set-won-taxpayer} ]{../../Taxpayer.sol}
+\end{minipage}
+
+Listing \ref{lst:set-won-taxpayer} shows a new function setWonLottery(), that allows legitimate Lottery objects to extend the tax allowance of the winning Taxpayer. The function can only be called externally and requires the sender address to be one of the aforementioned authorized lotteries. It also increases a counter for tracking lottery wins of an individual Taxpayer. The variable lotteryWins has no functional value to the lottery process, but is instead used by Echidna to assess the winning probabilities in the property shown in Listing \ref{lst:lottery-win-equality}. The function setExtendedTaxAllowance() is the same that is used if a Taxpayer becomes 65 years or older and has therefore been shown during Part 3 in Listing \ref{lst:set-extended-tax-allowance}.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=28, lastline=33, caption={Constructor in Lottery.sol}, label={lst:lottery-constructor} ]{../../Lottery.sol}
+\end{minipage}
+
+The Lottery object has been augmented to conduct lotteries in rounds. The rounds variable keeps track of the current iteration of the lottery process, which in turn makes participants able to participate in newer rounds, although they may have already participated in an earlier lottery.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=36, lastline=42, caption={Starting function in Lottery.sol}, label={lst:lottery-start} ]{../../Lottery.sol}
+\end{minipage}
+
+The startLottery() function (see Listing \ref{lst:lottery-start}) remains unchanged except the addition of the aforementioned round tracker.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=46, lastline=52, caption={Committing function in Lottery.sol}, label={lst:lottery-commit} ]{../../Lottery.sol}
+\end{minipage}
+
+The new commit() function (see Listing \ref{lst:lottery-commit}) implements the main use case for the round tracking. A new mapping for addresses to integers called participantRound[] has been created to note the addresses of lottery participants and the latest round that they have participated in. Should they have already participated, fails the require statement in line 3 and the transaction reverts. If the check passes, their latest round is updated.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=56, lastline=66, caption={Reveal function in Lottery.sol}, label={lst:lottery-reveal} ]{../../Lottery.sol}
+\end{minipage}
+
+The updated reveal() function (see Listing \ref{lst:lottery-reveal}) adds a check against revealing the same value multiple times by requiring that the sender address is only allowed once in the array of revealed numbers.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=70, lastline=87, caption={End lottery function in Lottery.sol}, label={lst:lottery-end} ]{../../Lottery.sol}
+\end{minipage}
+
+The new endLottery() function (see Listing \ref{lst:lottery-end}) improves the default one in three ways. It handles the case where no participants partake in the lottery better by enclosing the winner reveal logic in an if-clause in line 4. Furthermore, it deletes previously revealed participation entries to prepare the next round. Lastly, uses the more robust setWonLottery() function of the Taxpayer object (shown in Listing \ref{lst:set-won-taxpayer}) instead of setting the tax allowance directly on the object.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=90, lastline=92, caption={Get revealed participants in Lottery.sol}, label={lst:lottery-get-participants} ]{../../Lottery.sol}
+\end{minipage}
+
+The getRevealedParticipants() function (see Listing \ref{lst:lottery-get-participants}) is another informative function for Echidna to assert the lottery-related assertions seen in Listing \ref{lst:lottery-only-valid-entries} and \ref{lst:lottery-no-duplicates}.
