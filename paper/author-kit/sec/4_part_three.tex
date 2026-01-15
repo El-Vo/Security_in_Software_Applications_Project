@@ -60,7 +60,7 @@ The setter as shown in Listing \ref{lst:set-extended-tax-allowance} is purposefu
   \lstinputlisting[ language=Solidity, firstline=136, lastline=138, caption={Add tax allowance in Taxpayer.sol}, label={lst:add-tax-allowance} ]{../../Taxpayer.sol}
 \end{minipage}
 
-For this reason, the \texttt{private} helper function \texttt{addTaxAllowance()} (Listing \ref{lst:add-tax-allowance}) was added. If two Taxpayers divorce, the extended tax allowance must return to the Taxpayer(s) that won the lottery in the first place. To ensure that this is the case, the divorce() function was modified to reset each spouses tax allowance correctly (see Listing \ref{lst:divorce}):
+For this reason, the \texttt{private} helper function \texttt{addTaxAllowance()} (Listing \ref{lst:add-tax-allowance}) was added. If two \texttt{Taxpayers} divorce, the extended tax allowance must return to the \texttt{Taxpayer}(s) that won the lottery in the first place. To ensure that this is the case, the \texttt{divorce()} function was modified to reset each spouses tax allowance correctly (see Listing \ref{lst:divorce}):
 
 \noindent
 \begin{minipage}{\linewidth}
