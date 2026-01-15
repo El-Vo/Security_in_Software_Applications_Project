@@ -3,18 +3,24 @@
 
 With the code adjustments presented in the assignment, every defined Echidna property passes. Echidna reaches 7810 unique instructions across 50077 calls. Over the course of this coursework, the count of unique instructions increased steadily as more parts of the code were made accessible to Echidna through helper functions.
 
-\noindent
-\begin{minipage}{\linewidth}
-  \lstinputlisting[ language=Solidity, firstline=250, lastline=273, caption={Up-to-date results of Echidna running on \texttt{echidna.sol}}, label={lst:results} ]{../../echidna.sol}
-\end{minipage}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{echidna_results.png}
+  \caption{Up-to-date results of Echidna running on \texttt{echidna.sol}}
+  \label{fig:results}
+\end{figure}
 
 %-------------------------------------------------------------------------
 \subsection{Echidna coverage report}
 
-To evaluate the effectiveness of the fuzzing process, a comprehensive coverage report was generated. This report provides a detailed visualization of which branches and instructions were reached during the analysis. The report shows that the entire central program logic is reached by Echidna during testing. The following paragraph illustrates some of the few missing lines of coverage.
+To evaluate the effectiveness of the fuzzing process, a comprehensive coverage report was generated. This report provides a detailed visualization of which branches and instructions were reached during the analysis. The report shows that the entire central program logic is reached by Echidna during testing. The following paragraph discusses the few lines missing from the coverage.
 
-In \texttt{Lottery.sol}, line 56 is not reached by Echidna because Echidna does not perform identical valid reveals within a single round, which would require a human deliberately entering the same value twice. The function \texttt{getRevealedParticipants()} (line~85) is marked as unreached because it is a \texttt{view} function, despite actually being called when the invariants \texttt{echidna\_lottery\_no\_duplicates()} and \texttt{echidna\_lottery\_participants\_valid()} are tested. In \texttt{Taxpayer.sol}, the \texttt{return false} statement (line~232) remains unreached due to the strict \texttt{code.length} check beforehand, and the \texttt{revert} in line 195 is not triggered because it is improbable that some other code lies at the address that does not support the interface in our testing scenario.
+In \texttt{Lottery.sol}, line 56 is not reached as Echidna did not generate identical valid reveals within a single round during the test run. The function \texttt{getRevealedParticipants()} (line~85) is marked as unreached because coverage tracking for \texttt{view} functions invoked solely during property evaluation can be limited, despite it being called when the invariants \texttt{echidna\_lottery\_no\_duplicates()} and \texttt{echidna\_lottery\_participants\_valid()} are checked. In \texttt{Taxpayer.sol}, the \texttt{return false} statement (line~232) remains unreached due to the strict \texttt{code.length} check beforehand. Additionally, the \texttt{revert} in line 195 is not triggered, as it is highly improbable to encounter a contract at the target address that does not support the interface within this testing scenario.
 
 An interactive version of the coverage report is hosted externally and can be accessed via the following link.\footnote{\url{https://el-vo.github.io/Security_in_Software_Applications_Project/}}
 
-\qrcode[height=2cm]{https://el-vo.github.io/Security_in_Software_Applications_Project/}
+\begin{center}
+  \qrcode[height=2.5cm]{https://el-vo.github.io/Security_in_Software_Applications_Project/}
+
+  \small scan to view coverage report
+\end{center}
