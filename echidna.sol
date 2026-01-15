@@ -246,4 +246,29 @@ contract TestTaxpayer is Taxpayer {
     }
     return true;
   }
+
+  /*
+  Echidna results:
+  Compiling `echidna.sol`... Done! (0.774524833s)
+  Analyzing contract: /src/echidna.sol:TestTaxpayer
+  Running slither on `echidna.sol`... Done! (0.896848069s)
+  echidna_valid_married_tax_allowance_over_64: passing
+  echidna_valid_tax_allowance_winner: passing
+  echidna_valid_tax_allowance: passing
+  echidna_lottery_no_duplicates: passing
+  echidna_lottery_participants_valid: passing
+  echidna_state_consistency: passing
+  echidna_valid_married_tax_allowance: passing
+  echidna_tax_allowance_never_lower_than_zero: passing
+  echidna_no_self_marriage: passing
+  echidna_valid_tax_allowance_over_64: passing
+  echidna_marriage_symmetry: passing
+  echidna_lottery_fairness: passing
+
+  Unique instructions: 7810
+  Unique codehashes: 3
+  Corpus size: 29
+  Seed: 5996184453287415515
+  Total calls: 50077
+  */
 }
