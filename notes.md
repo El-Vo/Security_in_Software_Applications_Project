@@ -1,15 +1,17 @@
 # Things to consider:
+
 - 4 parts of a traditional contract reflected in smart contract
-    - Offer and acceptance
-    - Consideration
-    - Mutuality
-    - Capacity/Legality
+  - Offer and acceptance
+  - Consideration
+  - Mutuality
+  - Capacity/Legality
 
 # Task 1:
+
 - Check if person is married
-    - If so, check if spouse is set
-        - If so, check if spouse is also married
-            - If so, check if spouse is married to person
+  - If so, check if spouse is set
+    - If so, check if spouse is also married
+      - If so, check if spouse is married to person
 - Assumption: monogamous marriage >> No marriage allowed if already married
 - Check that parent aren't allowed to be yourself and the same
 - Check that the contract can only be called by the owner?
@@ -17,12 +19,14 @@
 - One wallet/account could create multiple taxpayers!
 
 ## Preliminary Results:
+
 - echidna_married_and_spouse_set_at_the_same_time: failed!💥  
   Call sequence:
-    TestTaxpayer.marry(0x0)
-    - Solution: filter addresses for invalid values such as 0x0-0x9,0xdEaD, one's own address
+  TestTaxpayer.marry(0x0)
+  - Solution: filter addresses for invalid values such as 0x0-0x9,0xdEaD, one's own address
 
 # Task 2:
+
 - Check that tax allowance can only be transferred if person is married
 - Check that tax allowance can never exceed the combined starting value
 - What happens to lottery winners that divorce?
@@ -31,16 +35,20 @@
 - Implementation of transfer and receive allowance to minimize tamper potential and only add funds that are deducted in the main account
 
 ## Preliminary Results:
+
 echidna_valid_tax_allowance: failed!💥  
-  Call sequence:
-    TestTaxpayer.marry_candidate()
-    TestTaxpayer.transferAllowance(1)
-    TestTaxpayer.divorce()
+ Call sequence:
+TestTaxpayer.marry_candidate()
+TestTaxpayer.transferAllowance(1)
+TestTaxpayer.divorce()
 
 # Task 3:
+
 - Check that lottery win doesn't influence the allowance for people over 64
+- What about taxpayers that are initialized with the age 70?
 
 # Task 4:
+
 - Make lottery system accessible to echidna
   - Idea: overload joinLottery function so that the lottery address is not randomly chosen, but instead given by an artificial lottery
     - Reached instructions increased from 5800 to 6200 -> Echidna reaches deeper into contract logic
@@ -49,9 +57,7 @@ echidna_valid_tax_allowance: failed!💥
 - uint256 public rev in taxpayer.sol is a security risk, but it is necessary for successful fuzzing. In reality you would save your true number off the blockchain.
 - Lottery l.56: require(revealed[i] != msg.sender, "Already revealed"); isnt reached by echidna but can only be reached by a human entering the same value twice deliberately
 - Lottery l.85: function getRevealedParticipants() public view returns (address[] memory) {
-        return revealed; does not get marked as revealed because it is a view function. Actually, it does get called when the invariants echidna_lottery_no_duplicates() and echidna_lottery_participants_valid() are tested
+  return revealed; does not get marked as revealed because it is a view function. Actually, it does get called when the invariants echidna_lottery_no_duplicates() and echidna_lottery_participants_valid() are tested
 - Taxpayer l.232: return false; doesnt get reached because of strong check beforehand for code.length
 - Taxpayer l.195: revert("Address does not support lottery interface"); does not get reached because it is improbable that some other code lies at the address that does not support the
   Address interface in out testing scenario
-  
-
