@@ -37,12 +37,22 @@ The solution presented in this report splits the transferAllowance() function in
 
 \noindent
 \begin{minipage}{\linewidth}
-  \lstinputlisting[ language=Solidity, firstline=100, lastline=107, caption={Function to send allowance to spouse in Taxpayer.sol}, label={lst:tax-allowance-default} ]{../../Taxpayer.sol}
+  \lstinputlisting[ language=Solidity, firstline=100, lastline=107, caption={Function to send allowance to spouse in Taxpayer.sol}, label={lst:send-tax-allowance} ]{../../Taxpayer.sol}
 \end{minipage}
+
+The improved transferAllowance() function as shown in Listing \ref{lst:send-tax-allowance} checks several preconditions. It ensures that the Taxpayer is married and has a positive allowance of at least the desired change amount. If that is the case, it deducts the transferred allowance from its own account and triggers a call of the receiveAllowance() function of the spouse object.
 
 \noindent
 \begin{minipage}{\linewidth}
-  \lstinputlisting[ language=Solidity, firstline=114, lastline=118, caption={Function to receive allowance from spouse Taxpayer.sol}, label={lst:tax-allowance-default} ]{../../Taxpayer.sol}
+  \lstinputlisting[ language=Solidity, firstline=114, lastline=118, caption={Function to receive allowance from spouse Taxpayer.sol}, label={lst:receive-tax-allowance} ]{../../Taxpayer.sol}
 \end{minipage}
 
-Security consideration: transferAllowance made internal
+The receiveAllowance() (shown in Listing \ref{lst:receive-tax-allowance}) function is declared as "external" in order to prevent the taxpayer from increasing its allowance one its own. To increase the access to control, it also checks the marital status of the executing Taxpayer and ensures that only the defined spouse is allowed to receive allowance. If the conditions are met, the private addTaxAllowance() (Listing \ref{lst:add-tax-allowance}) function is called.
+
+\noindent
+\begin{minipage}{\linewidth}
+  \lstinputlisting[ language=Solidity, firstline=136, lastline=138, caption={Function to change allowance in Taxpayer.sol}, label={lst:add-tax-allowance} ]{../../Taxpayer.sol}
+\end{minipage}
+
+Even though the talked about security improvements prevent Echidna from breaking the invariants, it must be noted that real malicious actors are still able to abuse the system at hand. One major attack vector is the check for valid spouse addresses (function shown in Listing \ref{lst:address-validation}). It is possible to craft a malicious taxpayer contract that implements the isContract() function in the same way as the original, but with malicious calls to e.g. receiveAllowance() or other functions. Furthermore, all public functions of a taxpayer instance can currently be called by anyone with the address of the taxpayer object. For a real production deployment, it would be necessary to only grant access to the original owner of the contract. These blind spots are created by the nature of Echidna fuzzing tests. On one hand, Echidna will not create entire malicious code classes to break invariants, but instead it resorts to calling the (helper) functions with various inputs. To
+simulate the mentioned attack vectors with Echidna, extensive scaffolding of malicious code with helper functions for Echidna are needed. For the purposes of this task, these security considerations were also deemed out-of-scope.

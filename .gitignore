@@ -22,3 +22,4 @@ paper/author-kit/*.synctex.gz
 node_modules/*
 .vscode/ltex.dictionary.en-US.txt
 paper/author-kit/sec/old_1_intro.tex
+.vscode/mcp.json
