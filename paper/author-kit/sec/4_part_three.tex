@@ -6,7 +6,7 @@ This part of the assignment introduces a tax relief program for people aged 65 y
 %-------------------------------------------------------------------------
 \subsection{Invariants}
 
-To model the constraints given by the task, two additional invariants were defined. The first invariant in Listing \ref{lst:senior-tax-allowance} checks that the tax allowance of an unmarried Taxpayer is exactly 7000 at all times.
+To model the constraints given by the task, two additional invariants were defined. The first invariant in Listing \ref{lst:senior-tax-allowance} checks that the tax allowance of an unmarried \texttt{Taxpayer} is exactly 7000 at all times.
 
 \noindent
 \begin{minipage}{\linewidth}
@@ -22,7 +22,7 @@ The second invariant checks that the combined allowance of a married couple over
 
 Of course, the tax allowance of elderly taxpayers should also never get below zero, so the invariant in Listing \ref{lst:tax-allowance-above-zero} defined in task 2 also applies to this task.
 
-By default, every Taxpayer is initialized with an age variable and the function haveBirthday(). The function progresses the age of the Taxpayer by one year. Every Taxpayer is "born" by default with the age zero, so the function needs to be called at least 65 times in order for the extended tax allowance to take effect. To increase the likelihood of Echidna reaching that threshold during testing, two new supporting functions were also added.
+By default, every \texttt{Taxpayer} is initialized with an \texttt{age} variable and the function \texttt{haveBirthday()}. The function progresses the age of the \texttt{Taxpayer} by one year. Every \texttt{Taxpayer} is "born" by default with the age zero, so the function needs to be called at least 65 times in order for the extended tax allowance to take effect. To increase the likelihood of Echidna reaching that threshold during testing, two new supporting functions were also added.
 
 \noindent
 \begin{minipage}{\linewidth}
@@ -34,30 +34,30 @@ By default, every Taxpayer is initialized with an age variable and the function 
   \lstinputlisting[ language=Solidity, firstline=150, lastline=154, caption={Advance spouses age by 15 years in echidna.sol}, label={lst:advance-age-quickly-spouse} ]{../../echidna.sol}
 \end{minipage}
 
-The supporting functions shown in Listing \ref{lst:advance-age-quickly} and \ref{lst:advance-age-quickly-spouse} increase the age of both the main Taxpayer and its spouse in 15 year increments. That way, echidna only needs to call this function five times total to reach the extended tax allowance of the two individuals.
+The supporting functions shown in Listing \ref{lst:advance-age-quickly} and \ref{lst:advance-age-quickly-spouse} increase the age of both the main \texttt{Taxpayer} and its spouse in 15-year increments. That way, Echidna only needs to call this function five times total to reach the extended tax allowance of the two individuals.
 
 %-------------------------------------------------------------------------
 \subsection{Code improvements}
 
-Since the default code has no inherent logic for setting the extended tax allowance for elderly Taxpayers, the haveBirthday() function was adapted with a condition for the age of the respective taxpayer.
+Since the default code has no inherent logic for setting the extended tax allowance for elderly \texttt{Taxpayers}, the \texttt{haveBirthday()} function was adapted with a condition for the age of the respective taxpayer.
 
 \noindent
 \begin{minipage}{\linewidth}
   \lstinputlisting[ language=Solidity, firstline=120, lastline=126, caption={Increase age on birthday in Taxpayer.sol}, label={lst:advance-birthday} ]{../../Taxpayer.sol}
 \end{minipage}
 
-The function referenced in Listing \ref{lst:advance-birthday} checks in addition to increasing the age of the Taxpayer if it crossed the age of 65 and has not received its extended tax allowance yet. If the checks pass, a setter function is called to set a boolean value extendedTaxAllowance permanently to true.
+The function referenced in Listing \ref{lst:advance-birthday} checks, in addition to increasing the age of the \texttt{Taxpayer}, if it crossed the age of 65 and has not received its extended tax allowance yet. If the checks pass, a setter function is called to set a boolean value \texttt{extendedTaxAllowance} permanently to \texttt{true}.
 
 \noindent
 \begin{minipage}{\linewidth}
   \lstinputlisting[ language=Solidity, firstline=146, lastline=154, caption={Set and get extended tax allowance in Taxpayer.sol}, label={lst:set-extended-tax-allowance} ]{../../Taxpayer.sol}
 \end{minipage}
 
-The setter as shown in Listing \ref{lst:set-extended-tax-allowance} is purposefully made to only set the extendedTaxAllowance to true once. It reflects the fact that it is not possible for an individual to lose its extended tax allowance or increase it multiple times. The extended tax allowance can be gained indefinitely either by winning the lottery or reaching the age of 65. In addition to setting the extendedTaxAllowance boolean, it also adds the difference between the default and extended tax allowance to the individuals tax allowance once. This approach is preferable to setting the tax allowance back to 7000, because it prevents cases where a spouse already transferred some of its initial tax allowance and therefore the couple would gain more than 2000 new tax allowance in total.
+The setter as shown in Listing \ref{lst:set-extended-tax-allowance} is purposefully made to only set the \texttt{extendedTaxAllowance} to \texttt{true} once. It reflects the fact that it is not possible for an individual to lose its extended tax allowance or increase it multiple times. The extended tax allowance can be gained indefinitely either by winning the lottery or reaching the age of 65. In addition to setting the \texttt{extendedTaxAllowance} boolean, it also adds the difference between the default and extended tax allowance to the individual's tax allowance once. This approach is preferable to setting the tax allowance back to 7000, because it prevents cases where a spouse already transferred some of its initial tax allowance and therefore the couple would gain more than 2000 new tax allowance in total.
 
 \noindent
 \begin{minipage}{\linewidth}
   \lstinputlisting[ language=Solidity, firstline=136, lastline=138, caption={Add tax allowance in Taxpayer.sol}, label={lst:add-tax-allowance} ]{../../Taxpayer.sol}
 \end{minipage}
 
-For this reason, the private helper function addTaxAllowance (Listing \ref{lst:add-tax-allowance}) was added. Regarding additional security concerns, a similar access control problem to part 2 can be identified. Since the haveBirthday() function is public with no further checks for owner privileges, anyone could increase the birthday of an individual taxpayer provided he or she has access to its address. Especially in the case of tracking the age of an individual, the progression of birthdays should ideally be handled in a fully automatic process. Additionally, it would be beneficial to track the exact birthdate of a Taxpayer in order to allow for an accurate age tracking.
+For this reason, the \texttt{private} helper function \texttt{addTaxAllowance} (Listing \ref{lst:add-tax-allowance}) was added. Regarding additional security concerns, a similar access control problem to part 2 can be identified. Since the \texttt{haveBirthday()} function is public with no further checks for owner privileges, anyone could increase the birthday of an individual taxpayer provided he or she has access to their address. Especially in the case of tracking the age of an individual, the progression of birthdays should ideally be handled in a fully automatic process. Additionally, it would be beneficial to track the exact birthdate of a \texttt{Taxpayer} in order to allow for an accurate age tracking.
